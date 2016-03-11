@@ -13,7 +13,7 @@ test_fpe3.c:(.text+0x5a): referencia a 'sqrt' sin definir
 collect2: error: ld returned 1 exit status
 
 La solución fue corregir la función sqrtf a sqrt y agregar el flag -lm 
-al momento de compilar
+(linkea a la libreria math) al momento de compilar
 gcc -g -O0 test_fpe3.c -lm -o test_fpe3.e
 
 
@@ -23,13 +23,18 @@ En test_fpe1
  ENTRADA: 2 y 3
  SALIDA: 0.666667 ===> OK
 
+ ENTRADA: 2.
+ SALIDA: inf ===> ERROR
+
+
 En test_fpe2
  ENTRADA: 2.0 y 3.0
  SALIDA: -1.000000 ===> OK
 
  ENTRADA: 2.0 y 0.0
- SALIDA: 1.000000 ===> OK a pesar que el resultado es infinto, este es mayor a 2.
- 
+ SALIDA: 1.000000 ===> ERROR  
+
+
 En test_fpe3
  ENTRADA: 2.0 y 0.0
  SALIDA: inf ===> ERROR
@@ -41,35 +46,31 @@ En el directorio fpe_x87_sse/ creo el objeto de la funcion
 gcc -c  -g -O0 fpe_x87_sse.c -o fpe_x87_sse.o
 
 
-Vuelvo al directorio e intento unir los objetos 
+Vuelvo al directorio linkeo los objetos 
+ gcc -c test_fpeX.c -DTRAPFPE -I./fpe_x87_sse/
+ LINKEO CON LA LIBRERIA
+ gcc -o test_fpeX.e test_fpeX.o ./fpe_x87_sse/fpe_x87_sse.o -lm
+ siendo X el numero de cada archivo.
+
 
 En test_fpe1
-
-gcc test_fpe1.o -Ifpe_x87_sse fpe_x87_sse/fpe_x87_sse.o -DTRAPFPE -o test_fpe1.e
-produce un error que antes no aparecía y se debe a que falta el linkeo 
-con la libreria de matematicas.
-
-Solucion:
-gcc test_fpe1.o -Ifpe_x87_sse fpe_x87_sse/fpe_x87_sse.o -DTRAPFPE -lm -o test_fpe1.e
-
+ Insert a, b 
+ 2
+ 0
+ floating point exception  ./test_fpe1.e
 
 En test_fpe2
-gcc test_fpe2.o -Ifpe_x87_sse fpe_x87_sse/fpe_x87_sse.o -DTRAPFPE -lm -o test_fpe2.e
+ Insert a, b 
+ 2
+ 0
+ floating point exception  ./test_fpe2.e
 
+En test_fpe3
+ Insert a, b 
+ 2
+ 0
+ floating point exception  ./test_fpe3.e
 
-
-
-
-gcc -c test_fpe1.c -DTRAPFPE -I./fpe_x87_sse/
-LINKEO CON LA LIBRERIA
-gcc -o test_fpe1.e test_fpe1.o ./fpe_x87_sse/fpe_x87_sse.o -lm
-
-
-
-
-
-
-
-
+Estos mensajes son correctos ya que se produce un overflow en el stack
 
 
